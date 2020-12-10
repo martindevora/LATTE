@@ -2273,8 +2273,8 @@ def TOI_TCE_files(indir):
         
         first_sec = int(string.split('-')[5][2:]) # this is the last imported sector 0 start from here
           
-
-    for sec in range(first_sec+1,27): # 27 because that's how many TESS sectors there will be in total
+    max_sectors = 500
+    for sec in range(first_sec+1,max_sectors):
     
         TCE_url = "https://archive.stsci.edu/missions/tess/download_scripts/sector/tesscurl_sector_{}_dv.sh".format(sec)
         r_TCE = requests.get(TCE_url) # create HTTP response object
@@ -2315,8 +2315,8 @@ def momentum_dumps_info(indir):
             string = f.readlines()[-1]
             first_sec = int(string[0:2])
 
-
-    for sec in range(first_sec+1,27): # 27 because that's how many TESS sectors there will be in total
+    max_sectors = 500
+    for sec in range(first_sec+1, max_sectors):
         
         try:
             lc_sec = np.genfromtxt('{}/data/tesscurl_sector_{}_lc.sh'.format(indir, str(sec)), dtype = str)
