@@ -2120,8 +2120,8 @@ def data_files(indir):
         else:
             first_sec_tp = int(string.split('-')[5][2:]) # this is the last imported sector 0 start from here
             
-    
-    for sec in range(first_sec+1,27): # 26 because that's how many TESS sectors there will be in total
+    max_sectors = 200
+    for sec in range(first_sec+1,max_sectors):
     
         LC_url = "https://archive.stsci.edu/missions/tess/download_scripts/sector/tesscurl_sector_{}_lc.sh".format(sec)
         r_LC = requests.get(LC_url) # create HTTP response object
@@ -2148,7 +2148,7 @@ def data_files(indir):
                 f.write(r_LC.content)
     
                 
-    for sec in range(first_sec_tp+1,27): # 26 because that's how many TESS sectors there will be in total
+    for sec in range(first_sec_tp+1,max_sectors):
     
         TP_url = "https://archive.stsci.edu/missions/tess/download_scripts/sector/tesscurl_sector_{}_tp.sh".format(sec)
         r_TP = requests.get(TP_url) # create HTTP response object 
@@ -2200,8 +2200,8 @@ def tp_files(indir):
             
         first_sec = (np.max(exist))
         
-            
-    for sec in range(first_sec+1,27): # 26 because that's how many TESS sectors there will be in total
+    max_sectors = 500
+    for sec in range(first_sec+1,max_sectors):
     
         if sec < 10:
             download_sector = "00{}".format(sec)
