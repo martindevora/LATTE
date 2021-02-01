@@ -1349,6 +1349,7 @@ def interact_LATTE_FFI_aperture(tic, indir, sectors_all, sectors, ra, dec, args)
 
     for index, X4 in enumerate(X4_list): 
         tpf = tpf_list[index]
+        tpfflux = tpf.flux.value
         t = t_list[index]
         X1 = X1flux_list[index]
         sec = sectors[index]
@@ -1530,7 +1531,7 @@ def interact_LATTE_FFI_aperture(tic, indir, sectors_all, sectors, ra, dec, args)
         
         # ----------
         # plot the mean image and plot the extraction apertures on top of it so that one can verify that the used apertures make sense
-        im = np.nanmean(tpf.flux, axis = 0)
+        im = np.nanmean(tpfflux, axis = 0)
         # set up the plot - these are stored and one of the images saved in the report      
         fig, ax = plt.subplots(1,2, figsize=(10,5), subplot_kw={'xticks': [], 'yticks': []})
         kwargs = {'interpolation': 'none', 'vmin': im.min(), 'vmax': im.max()}
@@ -2842,7 +2843,7 @@ def download_data_FFI_interact(indir,sector, sectors_all, tic, save = False):
             except:
                 count += 1
                 continue
-
+        tpftime = tpf.time.value
         if count == 5: # if it fails 4 times, exit the program with an error message
             print ("ERROR: Could not download the tpf file at this time. Please try again.")
             sys.exit('')
@@ -2864,7 +2865,8 @@ def download_data_FFI_interact(indir,sector, sectors_all, tic, save = False):
         print ("Start PCA analysis...", end =" ")
         
         # acess the flux information
-        X1 = tpf.flux
+        tpfflux = tpf.flux.value
+        X1 = tpfflux
         X1flux_list.append(X1)  # store tghe flux array in the list
 
         arrshape_list.append(X1.shape)  # store the shape in the list - not always the same shape but mostly 11 x 11 pixels.
@@ -2915,14 +2917,14 @@ def download_data_FFI_interact(indir,sector, sectors_all, tic, save = False):
             a = unnorm(x, M[n], S[n])
             X4[:,n] = a
         
-        t = tpf.time[lkeep]
+        t = tpftime[lkeep]
         
         alltime = t
 
          # ------------------------------------------------
 
         # add all the information to lists that are returned at the end. 
-        tpf_filt_list.append(X4.reshape(tpf.flux[lkeep,:,:].shape))
+        tpf_filt_list.append(X4.reshape(tpfflux[lkeep,:,:].shape))
 
         in_sec.append(sec)
 
@@ -3061,7 +3063,7 @@ def download_data_FFI(indir, sector, syspath, sectors_all, tic, save = False):
             print ("ERROR: Could not download the tpf file at this time. Please try again.")
             sys.exit('')
         # ---------
-        
+        tpftime = tpf.time.value
         # get rid of the 'bad' quality data - use the data flags and only take data where the quality = 0. 
         try:
             quality = tpf.quality
@@ -3075,7 +3077,8 @@ def download_data_FFI(indir, sector, syspath, sectors_all, tic, save = False):
 
         # extract the information and perform PCA
         print ("Start PCA analysis...", end =" ")
-        X1 = tpf.flux
+        tpfflux = tpf.flux.value
+        X1 = tpfflux
         arrshape_list.append(X1.shape)
 
         # identify the target mask - this will need to be imporved - a bit 'hacky' at the moment. 
@@ -3114,7 +3117,7 @@ def download_data_FFI(indir, sector, syspath, sectors_all, tic, save = False):
         
         # ----------
         # plot the mean image and plot the extraction apertures on top of it so that one can verify that the used apertures make sense
-        im = np.nanmean(tpf.flux, axis = 0)
+        im = np.nanmean(tpfflux, axis = 0)
         # set up the plot - these are stored and one of the images saved in the report      
         fig, ax = plt.subplots(1,2, figsize=(10,5), subplot_kw={'xticks': [], 'yticks': []})
         kwargs = {'interpolation': 'none', 'vmin': im.min(), 'vmax': im.max()}
@@ -3189,7 +3192,7 @@ def download_data_FFI(indir, sector, syspath, sectors_all, tic, save = False):
             a = unnorm(x, M[n], S[n])
             X4[:,n] = a
         
-        t=tpf.time[lkeep]
+        t=tpftime[lkeep]
         
         flux = X4[:,target_mask.flatten()].sum(axis=1) 
         flux_small = X4[:,target_mask_small.flatten()].sum(axis=1)
@@ -3278,7 +3281,7 @@ def download_data_FFI(indir, sector, syspath, sectors_all, tic, save = False):
          # ------------------------------------------------
 
         # add all the information to lists that are returned at the end. 
-        tpf_filt_list.append(X4.reshape(tpf.flux[lkeep,:,:].shape))
+        tpf_filt_list.append(X4.reshape(tpfflux[lkeep,:,:].shape))
 
         in_sec.append(sec)
 
@@ -3539,8 +3542,7 @@ def download_tpf_lightkurve(indir, transit_list, sector, tic, test = 'no'):
     TESS_binned_l= []
     small_binned_l= []
     tpf_list = []
- 
-    
+
     for idx,file in enumerate(dwload_link_tp):
 
         try:
@@ -3549,10 +3551,11 @@ def download_tpf_lightkurve(indir, transit_list, sector, tic, test = 'no'):
             # on very occasioal files the target pixel file is corrupt and cannot download with the TypeError: Buffer is too small.
             print ("\n !!! This target pixel file is corrupt and cannot be downloaded at this time. Please try again later or a different file. \n")
             return -111, -111, -111, -111, -111, -111, -111 # flag an error message
-
+        tpftime = tpf.time.value
+        tpfflux = tpf.flux.value
         # if the transit is within that sector then add it to the list to be used later
         for T0 in transit_list:
-            if (T0 > np.nanmin(tpf.time)) and (T0 < np.nanmax(tpf.time)):
+            if (T0 > np.nanmin(tpftime)) and (T0 < np.nanmax(tpftime)):
                 tpf_list.append(tpf)
 
         try:
@@ -3599,7 +3602,7 @@ def download_tpf_lightkurve(indir, transit_list, sector, tic, test = 'no'):
     
             # ----------
             # plot the mean image and plot the extraction apertures on top of it so that one can verify that the used apertures make sense
-            im = np.nanmean(tpf.flux, axis = 0)
+            im = np.nanmean(tpfflux, axis = 0)
             # set up the plot - these are stored and one of the images saved in the report      
             fig, ax = plt.subplots(1,2, figsize=(10,5), subplot_kw={'xticks': [], 'yticks': []})
             kwargs = {'interpolation': 'none', 'vmin': im.min(), 'vmax': im.max()}
@@ -4549,14 +4552,14 @@ def plot_TESS_stars(tic,indir,transit_list, transit_sec, tpf_list, args):
     # only run this for the first tpf (just needs to be one and might aswell take the first one)
     
     tpf =  tpf_list[0]
-
+    tpfflux = tpf.flux.value
     fig= plt.figure(figsize=(7,5.5))
 
     sector =  tpf.header['SECTOR']
     plt.title('Sector {}'.format(sector))
     
     # create a tupple of the array of the data and the wcs projection of the TESS cutout
-    tup = (np.nanmean(tpf.flux, axis=0),tpf.wcs)
+    tup = (np.nanmean(tpfflux, axis=0),tpf.wcs)
     
     # map the SDSS and TESS image onto each other - the output will be orented NORTH!
     wcs_out, shape_out = find_optimal_celestial_wcs(input_data =[tup, hdu])
@@ -4667,9 +4670,10 @@ def plot_TESS_stars_not_proj(tic, indir,transit_list, transit_sec, tpf_list, arg
 
     # background is just the array of the flux of all the pixels (used for backrgoudn in pixel level LC plot so mildly confusing and should change)
     for i, tpf in enumerate(tpf_list):
-
+        tpftime = tpf.time.value
+        tpfflux = tpf.flux.value
         # plt.subplot(row column number)
-        if (start > np.nanmin(tpf.time) and start < np.nanmax(tpf.time)):
+        if (start > np.nanmin(tpftime) and start < np.nanmax(tpftime)):
             fig, ax = plt.subplots(figsize=(5,5))
             plt.tight_layout()
 
@@ -4677,7 +4681,7 @@ def plot_TESS_stars_not_proj(tic, indir,transit_list, transit_sec, tpf_list, arg
 
             ax = plt.subplot(projection=tpf.wcs)
 
-            plot_cutout(tpf.flux[0])
+            plot_cutout(tpfflux[0])
 
             ra_stars, dec_stars = catalogData[bright]['ra'], catalogData[bright]['dec']
             s = np.maximum((19 - catalogData[bright]['Tmag'])*5, 0)
@@ -5391,9 +5395,9 @@ def plot_in_out_TPF_proj(tic, indir, X4_list, oot_list, t_list, intr_list, T0_li
         t = t_list[idx] # the time array 
         tpf_filt  =  tpf_filt_list[idx] # the filtered target pixel files 
         tpf = tpf_list[idx]
-        
+        tpfflux = tpf.flux.value
         # create a tupple of the array of the data and the wcs projection of the TESS cutout
-        tup = (np.nanmean(tpf.flux,axis=0),tpf.wcs)
+        tup = (np.nanmean(tpfflux,axis=0),tpf.wcs)
         
         # map the output so that the image will be oriented NORTH
         # the find_optimal_celestial_wcs function returns new world coordinate system (wcs) orented north that can be used to map the images
