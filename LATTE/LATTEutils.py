@@ -3586,18 +3586,18 @@ def download_tpf_lightkurve(indir, transit_list, sector, tic, test = 'no'):
             small_binned = tpf.to_lightcurve(aperture_mask=smaller_mask).flatten(window_length=100001)
             small_binned = small_binned.remove_outliers(6).bin(7)
     
-            TESS_unbinned_t = TESS_unbinned.time
-            TESS_binned_t = TESS_binned.time
-            small_binned_t = small_binned.time
+            TESS_unbinned_t = TESS_unbinned.time.value
+            TESS_binned_t = TESS_binned.time.value
+            small_binned_t = small_binned.time.value
              
             # ----------
             TESS_unbinned_t_l.append(TESS_unbinned_t)
             TESS_binned_t_l.append(TESS_binned_t)
             small_binned_t_l.append(small_binned_t)
             
-            TESS_unbinned_l.append(TESS_unbinned.flux)
-            TESS_binned_l.append(TESS_binned.flux)
-            small_binned_l.append(small_binned.flux)
+            TESS_unbinned_l.append(TESS_unbinned.flux.value)
+            TESS_binned_l.append(TESS_binned.flux.value)
+            small_binned_l.append(small_binned.flux.value)
             
     
             # ----------
