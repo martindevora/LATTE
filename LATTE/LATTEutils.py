@@ -2,6 +2,8 @@ from __future__ import print_function, absolute_import, division
 
 import os
 import csv
+import sys
+
 import astropy
 import numpy as np
 import pandas as pd
@@ -2367,12 +2369,12 @@ def tess_point(indir,tic):
     '''
 
     if not exists('{}/tesspoint'.format(indir)):
-        os.makedirs('{}/tesspoint'.format(indir))    
+        os.makedirs('{}/tesspoint'.format(indir))
 
-    os.system('python3 -m tess_stars2px -t {} > {}/tesspoint/{}_tesspoint.txt'.format(tic,indir,tic))
+    python = "python" + str(sys.version_info[0]) + "." + str(sys.version_info[1])
+    os.system(python + ' -m tess_stars2px -t {} > {}/tesspoint/{}_tesspoint.txt'.format(tic, indir, tic))
 
-    df = pd.read_csv('{}/tesspoint/{}_tesspoint.txt'.format(indir,tic), comment = '#', delimiter = '|', names = ['TIC','RA','Dec','EclipticLong','EclipticLat','Sector','Camera','Ccd','ColPix', 'RowPix'])
-
+    df = pd.read_csv('{}/tesspoint/{}_tesspoint.txt'.format(indir,tic), comment = '#', delimiter = '|', names = ['TIC','RA','Dec','EclipticLong','EclipticLat','Sector','Camera','Ccd','ColPix', 'RowPix', 'EdgeWarn'])
 
     return list(df['Sector']), float(df['RA'][0]), float(df['Dec'][0])
 
